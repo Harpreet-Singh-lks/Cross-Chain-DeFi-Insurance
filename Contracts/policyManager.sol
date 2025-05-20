@@ -31,9 +31,20 @@ contract policyManager is Ownable{
 
     mapping(address => uint256[]) public userPolices;// track the user policies
     // create a function for buying the policies 
-
+    mapping(uint256 => Policy) public policies; // Track policies by ID
     uint256 public poolUtilizationFactor; // e.g., 120 = 1.2x if pool is 80% full
+     uint256 public Duration =  30 days;
+    uint256 private policyCounter;
 
+     event PolicyPurchased(
+        uint256 policy_ID,
+        address indexed user,
+        address asset,
+        uint8 productType,
+        uint256 startTime,
+        uint256 expiryTime,
+        uint256 premium
+    );
     constructor() {
         // Initialize base rates and default risk factors (scaled by 100)
         riskprofiles[ProductType.SmartContractRisk] = RiskProfile(200, 150); // 2% base, 1.5x risk
@@ -44,7 +55,7 @@ contract policyManager is Ownable{
         poolUtilizationFactor = 100; // Default to 1.0x (no adjustment)
     }
 
-    uint256 public Duration =  30 days;
+   
 
 
     function BuyPolicy(address asset, uint8 productType)external  payable {
@@ -54,9 +65,11 @@ contract policyManager is Ownable{
 
         uint256 start = block.timestamp;
         uint256 end = start + duration;
+        
+        policyCounter++;
 
-        policies[policy_ID]=Policy{
-            policy_ID: policy_ID,
+        policies[policyCounter]=Policy{
+            policy_ID: policyCounter,
             asset_addrress: asset,
             user_address: meg.sender,
             productType : productType,
@@ -66,8 +79,8 @@ contract policyManager is Ownable{
             premium: CalculatePremium(ProductType(productType), msg.value) // Calculate premium based on product type and coverage amount
         };
 
-        userPolices[msg.sender].push(policy_ID);
-        emit PolicyPurchased(policy_ID, msg.sender, asset, productType, start, end, premium);
+        userPolices[msg.sender].push(policyCounter);
+        emit PolicyPurchased(policyCounter, msg.sender, asset, productType, start, end, premium);
     }
 
     function getUserPolicy(address user) external view returns(uint256[] memory){
