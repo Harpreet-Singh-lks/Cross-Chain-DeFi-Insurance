@@ -2,8 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "@wormhole-solidity-sdk/contracts/interfaces/IWormholeRelayer.sol";
+
 
 contract policyManager is Ownable{
+
+    IWormholeRelayer public wormholeRelayer;
+    
     enum ProductType {SmartContractRisk, RWA, DePIN }
     enum Status {
         active,
@@ -45,7 +51,9 @@ contract policyManager is Ownable{
         uint256 expiryTime,
         uint256 premium
     );
-    constructor() {
+    constructor(address _wormholeRelayer) Ownable(msg.sender) {
+        wormholeRelayer = IWormholeRelayer(_wormholeRelayer);
+        
         // Initialize base rates and default risk factors (scaled by 100)
         riskprofiles[ProductType.SmartContractRisk] = RiskProfile(200, 150); // 2% base, 1.5x risk
         riskprofiles[ProductType.RWA] = RiskProfile(100, 120);               // 1% base, 1.2x risk
@@ -54,7 +62,7 @@ contract policyManager is Ownable{
         // Initialize default pool utilization factor (scaled by 100)
         poolUtilizationFactor = 100; // Default to 1.0x (no adjustment)
     }
-
+    
    
 
 
@@ -106,18 +114,21 @@ contract policyManager is Ownable{
 
     return premium;
     }
+     function quoteCrossChainCost(uint16 targetChain) public view returns (uint256 cost) {
+        (cost,) = wormholeRelayer.quoteEVMDeliveryPrice(targetChain, 0, GAS_LIMIT);
+    }
 
-    /*  function calculatePremium(ProductType productType) public view returns (uint256) {
-        // Placeholder logic — you can enhance this based on risk level, pool health, etc.
-        if (productType == ProductType.SmartContractRisk) {
-            return basePremium;
-        } else if (productType == ProductType.RWA) {
-            return basePremium * 2;
-        } else if (productType == ProductType.DePIN) {
-            return basePremium * 3 / 2;
-        } else {
-            revert("Invalid product type");
-        }
-    } 
-    */
+    function sendMessage(uint16 targetChain, address targetAddress, suint256 policyId) external payable {
+        uint256 cost = quoteCrossChainCost(targetChain); // Dynamically calculate the cross-chain cost
+        require(msg.value >= cost, "Insufficient funds for cross-chain delivery");
+
+        wormholeRelayer.sendPayloadToEvm{value: cost}(
+            targetChain,
+            targetAddress,
+            abi.encode(policyId, msg.sender, policies[policyId].premium), // Payload contains the message and sender address
+            0, // No receiver value needed
+            GAS_LIMIT // Gas limit for the transaction
+        );
+
+}
 }
