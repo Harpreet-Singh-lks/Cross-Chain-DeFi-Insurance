@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import { useNavigate } from 'react-router-dom';
+import '../styles/HomePage.css'; // Import the CSS (we'll create this next)
 
 function HomePage(){
     const [isConnected, setisConnected] = useState(false);
@@ -38,40 +39,39 @@ function HomePage(){
 
     const handleGetStarted =async ()=>{
         if (isConnected ) {
-            navigate('/profile')
+            navigate('/userprofile')
+            
           } else{
             setError('Please Connect your Wallet First.')
           }
     }
     
-
-
     return (
         <>
-        <div className="homepage" >
+        <div className="homepage">
             <div className="header">
                 <button className="button-connectWallet" onClick={handleWalletConnect}>
-                    {isConnected? "WalletConnected" : "Connect Wallet" }</button>
+                    {isConnected? "Wallet Connected" : "Connect Wallet" }</button>
             </div>
             <div className="content">
-        {isError && <p style={{color: 'red'}}>{isError}</p>}
-        {isConnected && account &&(
-            <p>Connected Account : {account}</p>
-        )}
-        <button
-                    className="btn-upload"
-                   
-                    onClick={handleGetStarted}
-                  >
-                    Get Started!
-                  </button>
+                {isError && <p className="error-message">{isError}</p>}
+                {isConnected && account &&(
+                    <p className="account-info">Connected Account: {account}</p>
+                )}
+                <div className="center-content">
+                    <h1>Cross-Chain DeFi Insurance</h1>
+                    <p>Secure your assets across multiple blockchains</p>
+                    <button
+                        className="btn-get-started"
+                        onClick={handleGetStarted}
+                    >
+                        Get Started!
+                    </button>
+                </div>
             </div>
         </div>
-
         </>
-    )
-
+    );
 };
-
 
 export default HomePage;
