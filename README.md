@@ -1,66 +1,66 @@
-## Foundry
+# 🛡️ Cross-Chain DeFi Insurance Protocol
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+## 🌐 Overview
 
-Foundry consists of:
+The **Cross-Chain DeFi Insurance Protocol** addresses a critical gap in the blockchain ecosystem—**protecting digital assets across multiple chains**. This platform allows users to purchase insurance policies for various asset types and receive payouts seamlessly across different blockchains using **Wormhole’s secure cross-chain messaging protocol**.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+---
 
-## Documentation
+## ✨ Features
 
-https://book.getfoundry.sh/
+### 🧾 Multiple Insurance Products
+- **Smart Contract Coverage** – Protection against vulnerabilities and exploits in deployed contracts  
+- **Real-World Asset (RWA) Coverage** – Insurance for tokenized real-world assets  
+- **DePIN Coverage** – Coverage for decentralized physical infrastructure networks  
 
-## Usage
+### 🔁 Cross-Chain Claims Processing
+- Submit claims on the source chain  
+- Process and receive verified payouts on the destination chain  
+- Powered by **Wormhole** for secure and trust-minimized message passing  
 
-### Build
+### 🧑‍💻 User-Friendly Interface
+- Browse and purchase insurance policies  
+- Manage active policies via a dashboard  
+- Submit and track claims in real-time  
 
-```shell
-$ forge build
-```
+### 📊 Dynamic Pricing Model
+- Premiums calculated based on:
+  - Risk levels of insured assets  
+  - Utilization of insurance pools  
+  - On-chain and off-chain risk metrics  
 
-### Test
+---
 
-```shell
-$ forge test
-```
+## 🏗 Architecture
 
-### Format
+The protocol is composed of three core components:
 
-```shell
-$ forge fmt
-```
+- **PolicyManager Contract** – Handles policy issuance, premium calculations, and payment processing  
+- **ClaimVerify Contract** – Verifies and validates claims, handles cross-chain messaging and payout logic  
+- **Frontend Application** – A React.js-based UI for users to interact with policies and submit claims  
 
-### Gas Snapshots
 
-```shell
-$ forge snapshot
-```
 
-### Anvil
+---
 
-```shell
-$ anvil
-```
+## 💻 Tech Stack
 
-### Deploy
+- **Smart Contracts** – Solidity `^0.8.x`  
+- **Development Framework** – [Foundry](https://book.getfoundry.sh/)  
+- **Cross-Chain Protocol** – [Wormhole](https://wormhole.com/)  
+- **Frontend** – React.js, ethers.js  
+- **Supported Networks** – Avalanche Fuji, Celo Alfajores  
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+---
 
-### Cast
 
-```shell
-$ cast <subcommand>
-```
+## 🤝 Contributing
 
-### Help
+Contributions are welcome! Feel free to fork the repo and submit a pull request. Please follow the standard [contribution guidelines](CONTRIBUTING.md) (to be added).
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
