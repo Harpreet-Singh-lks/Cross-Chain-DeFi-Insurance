@@ -13,18 +13,19 @@ contract DeployClaimVerify is Script {
         address policyManagerAddress = vm.envAddress("POLICY_MANAGER_ADDRESS");
         address wormholeRelayerAddress;
         uint16 targetChainId;
-        address targetRiskPoolAddress = vm.envAddress("TARGET_RISK_POOL_ADDRESS");
+        address targetRiskPoolAddress = address(0x1111111111111111111111111111111111111111); 
+        
         
         uint256 chainId = block.chainid;
         
         if (chainId == 43113) {
             // Avalanche Fuji Testnet
             wormholeRelayerAddress = 0x7B1bD7a6b4E61c2a123AC6BC2cbfC614437D0470;
-            targetChainId = 44787; // Celo Alfajores Chain ID in Wormhole
+            targetChainId = 14; // Celo Alfajores Chain ID in Wormhole
         } else if (chainId == 44787) {
             // Celo Alfajores Testnet
             wormholeRelayerAddress = 0x306B68267Deb7c5DfCDa3619E22E9Ca39C374f84;
-            targetChainId = 43113; // Avalanche Fuji Chain ID in Wormhole
+            targetChainId = 6; // Avalanche Fuji Chain ID in Wormhole
         } else {
             revert("Unsupported network");
         }

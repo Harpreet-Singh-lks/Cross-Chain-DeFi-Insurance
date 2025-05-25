@@ -2,9 +2,9 @@
 
 pragma solidity ^0.8.0;
 
-import "@wormhole-solidity-sdk/contracts/interfaces/IWormhole.sol";
-import "@wormhole-solidity-sdk/contracts/interfaces/IWormholeRelayer.sol";
-import "./interfaces/IPolicyManager.sol";
+import "../Wormhole/lib/wormhole-solidity-sdk/src/interfaces/IWormhole.sol";//contracts/interfaces/IWormhole.so;
+import "../Wormhole/lib/wormhole-solidity-sdk/src/interfaces/IWormholeRelayer.sol";
+import "./inteface/IPolicyManager.sol";
 
 contract ClaimVerify{
      IWormhole public wormhole;
@@ -38,9 +38,10 @@ contract ClaimVerify{
         wormholeRelayer = IWormholeRelayer(_wormholeRelayerAddress);
         targetChainId = _targetChainId;
         targetRiskPoolAddress = _targetRiskPoolAddress;
-        
-    
     }
+    
+       
+    
 
     function receiveMessage(bytes memory payload) external {
         // Decode the payload
@@ -50,12 +51,12 @@ contract ClaimVerify{
   
     
     // Log the received message
-    emit MessageReceived(string(abi.encodePacked("Processed claim for policy: ", uintToString(policyId))));
+    emit MessageReceived(string(abi.encodePacked("Processed claim for policy: ", policyId)));
 
     claimInitiated(policyId);
     }
 
-    function claimInitiated(uint256 policyId)external {
+    function claimInitiated(uint256 policyId) public {
         require(!claimProcessed[policyId], "claim already proceessed");
         IPolicyManager.Policy memory policy = policyManager.getPolicy(policyId);
 
@@ -91,39 +92,27 @@ contract ClaimVerify{
     function sendMessage( uint256 policyId,
         address recipient,
         uint256 amount) private {
-        uint256 cost = quoteCrossChainCost(targetChain); // Dynamically calculate the cross-chain cost
+        uint256 cost = quoteCrossChainCost(targetChainId); // Dynamically calculate the cross-chain cost
         //require(msg.value >= cost, "Insufficient funds for cross-chain delivery");
 
-        bytes32 sequence= wormholeRelayer.sendPayloadToEvm{value: cost}(
-            targetChain,
+        uint64 sequence = wormholeRelayer.sendPayloadToEvm{value: cost}(
+            targetChainId,
             targetRiskPoolAddress,
             abi.encode(  policyId, recipient, amount ), 
             0, // No receiver value needed
             GAS_LIMIT // Gas limit for the transaction
         );
 
-        emit MessageSent(policyId, targetChain, sequence);
+        emit MessageSent(policyId, targetChainId, bytes32(abi.encodePacked(sequence)));
+
+        
     }
 
     event MessageReceived(string message);
 
-    interface IPolicyManager {
-    enum ProductType {SmartContractRisk, RWA, DePIN}
-    enum Status {active, expired, Claimed}
     
-    struct Policy {
-        uint256 policy_ID;
-        address asset_addrress;
-        address user_address;
-        ProductType productType;
-        Status status_policy;
-        uint256 startTime;
-        uint256 expiryTime;
-        uint256 premium;
-    }
     
-    function getPolicy(uint256 policyId) external view returns (Policy memory);
 }
-}
+
 
 // first mssg recieve => claim is initaited and claim is status is updated and is stored 

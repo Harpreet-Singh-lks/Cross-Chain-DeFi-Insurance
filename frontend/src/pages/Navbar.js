@@ -26,9 +26,7 @@ export default function Navbar() {
                 <li>
                     <Link to="/policies">Policies</Link>
                 </li>
-                <li>
-                    <Link to="/claims">Claims</Link>
-                </li>
+               
                 <li>
                     <button className="logout-btn" onClick={handleLogout}>
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">

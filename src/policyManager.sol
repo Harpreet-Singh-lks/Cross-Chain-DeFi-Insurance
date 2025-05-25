@@ -2,14 +2,15 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import "@wormhole-solidity-sdk/contracts/interfaces/IWormholeRelayer.sol";
+//import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "../Wormhole/lib/wormhole-solidity-sdk/src/interfaces/IWormholeRelayer.sol";
 
 
 contract policyManager is Ownable{
 
     IWormholeRelayer public wormholeRelayer;
-    
+    uint256 private constant GAS_LIMIT = 300000;
+
     enum ProductType {SmartContractRisk, RWA, DePIN }
     enum Status {
         active,
@@ -69,26 +70,27 @@ contract policyManager is Ownable{
     function BuyPolicy(address asset, uint8 productType)external  payable {
         // here the cchallenge is the premium cost 
         require(msg.value > 0, "the premium should be greater than zero");
-        require(duration>0, "the duration can't be negative or zero");
+        require(Duration>0, "the duration can't be negative or zero");
 
         uint256 start = block.timestamp;
-        uint256 end = start + duration;
+        uint256 end = start + Duration;
         
         policyCounter++;
+        uint256 calculatedPremium = CalculatePremium(ProductType(productType), msg.value);
 
-        policies[policyCounter]=Policy{
+        policies[policyCounter]=Policy({
             policy_ID: policyCounter,
             asset_addrress: asset,
-            user_address: meg.sender,
-            productType : productType,
+            user_address: msg.sender,
+            productType : ProductType(productType),
             status_policy: Status.active,
             startTime: start, 
             expiryTime: end,
-            premium: CalculatePremium(ProductType(productType), msg.value) // Calculate premium based on product type and coverage amount
-        };
+            premium: calculatedPremium // Calculate premium based on product type and coverage amount
+        });
 
         userPolices[msg.sender].push(policyCounter);
-        emit PolicyPurchased(policyCounter, msg.sender, asset, productType, start, end, premium);
+        emit PolicyPurchased(policyCounter, msg.sender, asset, productType, start, end, calculatedPremium);
     }
 
     function getUserPolicy(address user) external view returns(uint256[] memory){
@@ -107,8 +109,8 @@ contract policyManager is Ownable{
     // calculating the premium
      uint256 premium = (
         coverageAmount *
-        profile.baseRate *
-        profile.riskFactor *
+        profiles.baseRate *
+        profiles.riskFactor *
         poolUtilizationFactor
     ) / (BASE_DENOMINATOR**2);
 
@@ -118,7 +120,7 @@ contract policyManager is Ownable{
         (cost,) = wormholeRelayer.quoteEVMDeliveryPrice(targetChain, 0, GAS_LIMIT);
     }
 
-    function sendMessage(uint16 targetChain, address targetAddress, suint256 policyId) external payable {
+    function sendMessage(uint16 targetChain, address targetAddress, uint256 policyId) external payable {
         uint256 cost = quoteCrossChainCost(targetChain); // Dynamically calculate the cross-chain cost
         require(msg.value >= cost, "Insufficient funds for cross-chain delivery");
 

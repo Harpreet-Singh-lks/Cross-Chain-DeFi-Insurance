@@ -40,7 +40,7 @@ function Userprofile() {
             // Redirect to homepage if not connected
             console.log("what the fuck");
            // setError("the user wallet is discconnected");
-            // navigate('/');
+             navigate('/');
         } else {
             // Fetch user data from blockchain or API
             fetchUserData(userAddress);
